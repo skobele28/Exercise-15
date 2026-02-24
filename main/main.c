@@ -27,19 +27,20 @@ void IRAM_ATTR oneshot_timer_handler(void* arg)
 }
 
 
-/*************************/
-/* 3. Echo ISR goes here */
-/*************************/
+
+// Echo ISR
 void IRAM_ATTR echo_isr_handler(void* arg){
     
+    // capture time of rising edge
     if (gpio_get_level(ECHO)) 
     {
         last_time = esp_timer_get_time ();
     }
+    // capture time of falling edge
     if (!gpio_get_level(ECHO)) 
     {
         new_time = esp_timer_get_time();
-        echo_pulse_time = new_time-last_time;
+        echo_pulse_time = new_time-last_time;   // calculate echo pulse time
     }
 }
 
@@ -75,14 +76,11 @@ void hc_sr04_init() {
 void app_main(){
     hc_sr04_init();
     while(1){
-        gpio_set_level(TRIG, 1);
-        esp_timer_start_once(oneshot_timer, 10);
-        vTaskDelay(40/portTICK_PERIOD_MS);
-        float distance = (echo_pulse_time)/58.3;
-        printf("Distance: %f cm\n", distance);
+        gpio_set_level(TRIG, 1);                    // set Trigger high
+        esp_timer_start_once(oneshot_timer, 10);    // start ESP Timer for 10us
+        vTaskDelay(40/portTICK_PERIOD_MS);          
+        float distance = (echo_pulse_time)/58.3;    // calculate distance (cm)
+        printf("Distance: %f cm\n", distance);      // print distance
         vTaskDelay(1000/portTICK_PERIOD_MS);
     }
 }
-/***************************/
-/* 4. app_main() goes here */
-/***************************/
